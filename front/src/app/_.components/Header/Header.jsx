@@ -9,12 +9,9 @@ export default function Header() {
   return (
     <header className={`${styles.header} d-flex flex-row align-items-center`}>
       <div className="flex-fill">
+          <h1 className={`font-bold text-2xl`}>Quiz App</h1>
       </div>
       <ul className={styles.headerList}>
-        <button className="mr-15 btn btn-reverse-primary">
-          <i className="fa-solid fa-heart mr-5"></i>
-          <span>Wishlist</span>
-        </button>
         <button className="btn btn-primary">
           connexion
         </button>
