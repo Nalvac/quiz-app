@@ -1,11 +1,25 @@
 'use client';
 
 import {useRouter} from 'next/navigation';
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import styles from "./pages.module.scss"
+import {io} from "socket.io-client";
 
 export default function Home() {
 
+  const socket = io('http://localhost:4000');
+
+  useEffect(() => {
+    socket.on('connect', () => {
+      debugger
+      console.log('Connecté au serveur WebSocket');
+    });
+
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
 	return (
 			<div className={`d-flex flex-column justify-content-center align-items-center ${styles.appContainer}`}>
