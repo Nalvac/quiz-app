@@ -27,6 +27,7 @@
     "@nestjs/platform-socket.io": "^10.3.3",
     "@nestjs/typeorm": "^10.0.2",
     "@nestjs/websockets": "^10.2.10",
+    "dotenv": "^16.4.4",
     "gameinterface": "file:../GameInterface",
     "mysql2": "^3.9.1",
     "openai": "^4.20.1",

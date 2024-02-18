@@ -11,7 +11,6 @@ export interface GameRoom {
   isPrivate: boolean;
 }
 
-
 export interface Question {
   id: string;
   theme: string;
