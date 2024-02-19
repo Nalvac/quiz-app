@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import styles from "../../pages.module.scss"
+import styles from "./page.module.scss"
 export default function QuizSettings()  {
 	const [selectedTheme, setSelectedTheme] = useState('Science');
 	const [difficulty, setDifficulty] = useState('facile');

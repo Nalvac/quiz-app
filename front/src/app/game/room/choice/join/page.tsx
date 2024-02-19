@@ -1,5 +1,5 @@
 'use client';
-import styles from "../../../pages.module.scss"
+import styles from "./page.module.scss"
 export default function JoinRoom() {
 	return(
 			<div className={`d-flex flex-column justify-content-center align-items-center ${styles.appContainer}`}>

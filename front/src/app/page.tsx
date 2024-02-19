@@ -7,7 +7,7 @@ import {io} from "socket.io-client";
 
 export default function Home() {
 
-  const socket = io('http://localhost:4000');
+  const socket = io('http://localhost:3000');
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -36,8 +36,8 @@ export default function Home() {
 						</p>
 
 						<div className="w-300 mt-25 d-flex space-between">
-							<a className="btn large btn-reverse-primary" href='/game/roomChoice'>Salle Privé</a>
-							<a className="btn large btn-reverse-primary" href='/game/room_choice/joinRoom'>Salle
+							<a className="btn large btn-reverse-primary" href='/game/room/choice/create'>Salle Privé</a>
+							<a className="btn large btn-reverse-primary" href='/game/room/choice/join'>Salle
 								Public</a>
 						</div>
 					</div>
