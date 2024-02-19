@@ -17,7 +17,7 @@ export default function JoinRoom() {
 					</div>
 
 					<div className="d-flex align-items-center justify-content-center">
-						<button className='btn btn-primary mt-2'>Rejoindre</button>
+						<button className='btn btn-primary mt-2'><a href='/game/quiz_settings'>Rejoindre</a></button>
 					</div>
 				</form>
 			</div>

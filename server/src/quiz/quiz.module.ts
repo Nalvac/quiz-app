@@ -5,6 +5,7 @@ import * as process from "process";
 import * as dotenv from 'dotenv';
 import {QuizController} from "./quiz.controller";
 import {QuizGateway} from "./quiz.gateway";
+import {QuizService} from "./quiz.service";
 
 dotenv.config();
 @Module({
