@@ -44,7 +44,7 @@ export class QuizGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('createRoom')
-  handleCreateRoom(client: Socket, { roomId, theme, isPrivate, admin }: GameRoom) {
+  handleCreateRoom(client: Socket, { roomId, theme, isPrivate, createBY }: GameRoom) {
     const existingRoom = this.rooms.find((room) => room.roomId === roomId);
 
     if (existingRoom) {
@@ -53,11 +53,13 @@ export class QuizGateway implements OnGatewayConnection, OnGatewayDisconnect {
     } else {
       // Create a new room
       const newRoom: GameRoom = {
+        difficultyLevels: "",
+        randomTheme: false,
         roomId: roomId,
         clients: [client],
         theme,
         isPrivate,
-        admin,
+        createBY
       };
 
       this.rooms.push(newRoom);
@@ -90,18 +92,12 @@ export class QuizGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   private createPublicRoom(client: Socket, roomId: string) {
-    // Handle creating a new public room
     const newRoom: GameRoom = {
+      difficultyLevels: "", randomTheme: false,
       roomId: roomId,
       clients: [client],
       theme: '', // Set the theme as needed
-      isPrivate: false,
-      admin: {
-        id: client.id,
-        username: 'Admin', // Set the admin username as needed
-        score: 0,
-        isAdmin: true,
-      },
+      isPrivate: false
     };
 
     this.rooms.push(newRoom);

@@ -13,7 +13,7 @@ export interface GameRoom {
   isPrivate: boolean;
   clients?: Socket[];
   themes?: string[];
-  createBY: Socket;
+  createBY?: Socket;
   difficultyLevels: string;
   randomTheme: boolean
 }
