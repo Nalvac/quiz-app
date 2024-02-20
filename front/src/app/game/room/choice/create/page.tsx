@@ -5,8 +5,7 @@ import React, {useEffect, useState} from "react";
 import {useUser} from "@/context/userContext";
 import {useRouter} from "next/navigation";
 import {toast} from "react-toastify";
-import {GameRoom, QuizConfig} from 'gameinterface/models';
-import io from "socket.io-client";
+import {GameRoom} from 'gameinterface/models';
 import Link from "next/link";
 
 export default function RoomChoice() {
@@ -35,9 +34,6 @@ export default function RoomChoice() {
   const {socket, userContextName} = useUser();
   const router = useRouter();
 
-  useEffect(() => {
-    console.log(userContextName);
-  }, []);
   useEffect(() => {
 
     if (themeChoice === 'random') {
@@ -81,7 +77,7 @@ export default function RoomChoice() {
     socket.on('roomCreated', (message: string) => {
       console.log(message);
       toast.success(`${message}`);
-      router.push('/game/container')
+      router.push('/game/room/choice/join')
     });
     setRoomConfig(roomConfig);
   };
@@ -95,7 +91,7 @@ export default function RoomChoice() {
     <div className={`d-flex flex-column justify-content-center align-items-center ${styles.appContainer}`}>
       <form className={`d-flex flex-column card p-30  ${styles.recipeForm}`}>
         <div className={`p-4 bg-white w-800 rounded`}>
-          <h2 className="text-2xl font-bold mb-4">Création d'une Salle privée</h2>
+          <h2 className="text-2xl font-bold mb-4">Création dune Salle privée</h2>
 
           <div className="flex items-center space-x-4 mb-4">
             <label className="inline-flex items-center">
