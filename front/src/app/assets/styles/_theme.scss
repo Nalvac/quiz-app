@@ -59,9 +59,11 @@ label {
 }
 
 input {
-  padding: 10px 15px;
-  border: 2px solid var(--gray-2);
-  border-radius: 20px;
+  padding: 10px !important;
+  border: 1px solid #ccc !important;
+  background-color: #fff !important;
+  cursor: pointer;
+  border-radius: 0.25em;
 }
 
 .form-error {

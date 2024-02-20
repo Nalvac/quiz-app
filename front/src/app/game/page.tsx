@@ -4,20 +4,13 @@ import {useRouter} from 'next/navigation';
 import React, {useEffect, useState} from "react";
 import styles from "../pages.module.scss"
 import {io} from "socket.io-client";
+import {useUser} from "@/context/userContext";
+import Link from "next/link";
 
 export default function Game() {
-
-  const socket = io('http://localhost:4000');
-
+  const {socket, userContextName} = useUser();
   useEffect(() => {
-    socket.on('connect', () => {
-      console.log('Connecté au serveur WebSocket');
-    });
-
-
-    return () => {
-      socket.disconnect();
-    };
+    console.log(userContextName);
   }, []);
 
   return (
@@ -35,8 +28,8 @@ export default function Game() {
           </p>
 
           <div className="w-300 mt-25 d-flex space-between">
-            <a className="btn large btn-reverse-primary" href='/game/room_choice'>Salle Privé</a>
-            <a className="btn large btn-reverse-primary" href='/game'>Salle Public</a>
+            <Link className="btn large btn-reverse-primary" href='/game/room_choice'>Salle Privé</Link>
+            <Link className="btn large btn-reverse-primary" href='/game'>Salle Public</Link>
           </div>
         </div>
       </div>

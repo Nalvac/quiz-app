@@ -8,8 +8,10 @@ export interface Player {
 }
 
 export interface GameRoom {
-  roomId: string;
-  theme: string;
+  roomId?: string;
+  theme: Array<string>;
+  name: string,
+  password: string,
   isPrivate: boolean;
   clients?: Socket[];
   themes?: string[];

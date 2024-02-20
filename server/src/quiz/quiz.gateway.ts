@@ -33,80 +33,105 @@ export class QuizGateway implements OnGatewayConnection, OnGatewayDisconnect {
   roomUsersCount: Record<string, number> = {};
 
   @SubscribeMessage('joinRoom')
-  handleJoinRoom(client: Socket, { roomId, isPrivate }: { roomId: string; isPrivate: boolean }) {
+  handleJoinRoom(client: Socket, { roomId, isPrivate, password }: { roomId: string; isPrivate: boolean, password: string }) {
     if (isPrivate) {
-      // Handle joining a private room
-      this.joinPrivateRoom(client, roomId);
+      this.joinPrivateRoom(client, roomId, password);
     } else {
-      // Handle joining or creating a public room with a limit of 10 clients
       this.joinOrCreatePublicRoom(client, roomId);
     }
   }
 
+
   @SubscribeMessage('createRoom')
-  handleCreateRoom(client: Socket, { roomId, theme, isPrivate, createBY }: GameRoom) {
+  handleCreateRoom(client: Socket, roomConfig: GameRoom) {
+    const roomId = this.generateRandomRoomId();
+
     const existingRoom = this.rooms.find((room) => room.roomId === roomId);
 
     if (existingRoom) {
-      // Notify the client that the room ID is already in use
-      client.emit('roomCreationError', 'Room ID is already in use');
-    } else {
-      // Create a new room
-      const newRoom: GameRoom = {
-        difficultyLevels: "",
-        randomTheme: false,
-        roomId: roomId,
-        clients: [client],
-        theme,
-        isPrivate,
-        createBY
-      };
+      return this.handleCreateRoom(client, roomConfig);
+    }
 
-      this.rooms.push(newRoom);
-      client.join(roomId);
-      client.emit('roomCreated', 'Room created successfully');
+    const newRoom: GameRoom = {
+      difficultyLevels: roomConfig.difficultyLevels,
+      randomTheme: roomConfig.randomTheme,
+      roomId: roomId,
+      clients: [client],
+      theme: roomConfig.theme,
+      isPrivate: true,
+      createBY: client,
+      name: roomConfig.name,
+      password: roomConfig.password
+    };
+
+    this.rooms.push(newRoom);
+    client.join(roomId);
+    client.emit('roomCreated', `Room created successfully`);
+  }
+
+  @SubscribeMessage('startGame')
+  handleStartGame(client: Socket, roomId: string) {
+    this.startGame(client, roomId);
+  }
+
+
+  private startGame(client: Socket, roomId: string) {
+    const room = this.getRoomById(roomId);
+
+    if (room && room.createBY.id === client.id) {
+      this.server.to(roomId).emit('gameStarted', 'Le jeu a commencé !');
+    } else {
+      client.emit('error', 'Vous n\'êtes pas autorisé à lancer le jeu.');
     }
   }
 
-  // Add more event handlers for quiz challenges, answers, etc.
-
-  private joinPrivateRoom(client: Socket, roomId: string) {
-    // Handle joining a private room
-    client.join(roomId);
-    client.emit('roomJoined', `You've joined the private room ${roomId}`);
+  private generateRandomRoomId(): string {
+    return Math.random().toString(36).substring(2, 8);
   }
+
+  private getRoomById(roomId: string): GameRoom | undefined {
+    return this.rooms.find(room => room.roomId === roomId);
+  }
+
+  private joinPrivateRoom(client: Socket, roomId: string, password: string) {
+    const room = this.rooms.find((room) => room.name === roomId);
+
+    if (room && room.password === password) {
+      client.join(roomId);
+      client.emit('roomJoined', `You've joined the private room ${roomId}`);
+
+      if(room.createBY.id !== client.id) {
+        room.clients.push(client);
+      }
+
+      const clientsCount = room.clients.length;
+      this.server.to(roomId).emit('roomJoined', {
+        message: `You've joined the private room ${roomId}`,
+        clientsCount: clientsCount
+      });
+    } else {
+      client.emit('roomJoined', 'Invalid room or password');
+    }
+  }
+
 
   private joinOrCreatePublicRoom(client: Socket, roomId: string) {
     const publicRoom = this.rooms.find((room) => room.roomId === roomId);
 
     if (!publicRoom) {
-      // Create a new public room if it doesn't exist
       this.createPublicRoom(client, roomId);
     } else if (publicRoom.clients.length < 10) {
-      // Join the existing public room if there are fewer than 10 clients
       this.joinPublicRoom(client, publicRoom);
     } else {
-      // Notify the client that the public room is full
       client.emit('roomFull', 'The public room is full');
     }
   }
 
   private createPublicRoom(client: Socket, roomId: string) {
-    const newRoom: GameRoom = {
-      difficultyLevels: "", randomTheme: false,
-      roomId: roomId,
-      clients: [client],
-      theme: '', // Set the theme as needed
-      isPrivate: false
-    };
 
-    this.rooms.push(newRoom);
-    client.join(roomId);
-    client.emit('roomCreated', 'Room created successfully');
   }
 
   private joinPublicRoom(client: Socket, room: GameRoom) {
-    // Handle joining an existing public room
     room.clients.push(client);
     client.join(room.roomId);
     client.emit('roomJoined', `You've joined the public room ${room.roomId}`);
