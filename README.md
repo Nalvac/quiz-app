@@ -54,6 +54,3 @@ Alternativement, vous pouvez exécuter le projet avec Docker en utilisant la com
 ```bash
 docker-compose up
 ```
-```
-
-Cette version du `README.md` est plus structurée et détaillée, ce qui facilite la compréhension pour les autres développeurs.
