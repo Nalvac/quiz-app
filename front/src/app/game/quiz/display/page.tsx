@@ -3,11 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { io } from "socket.io-client";
 import { SuccessSnackBar } from '@/app/_.components/Snackbar/Success';
 import { ErrorSnackBar } from '@/app/_.components/Snackbar/Error';
-import { Loading } from '@/app/_.components/Loading/Loading';
 import { LoadingQuiz } from '@/app/_.components/LoadingQuiz/LoadingQuiz';
 
 const socket = io('http://localhost:3000');
-
 
 interface IQuiz {
   question: string;
@@ -30,6 +28,7 @@ export default function Quiz() {
   const [questionNumber, setQuestionNumber] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(10);
   const [theme, setTheme] = useState("Mathématique");
+  let [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     socket.once("connect", () => {
@@ -46,11 +45,13 @@ export default function Quiz() {
       setCorrectResponse(data[questionNumber].correctResponse);
     });
 
-    if (time < 20) {
-      const timer = setTimeout(() => {
-        setTime(time + 1);
-      }, 1000);
-      return () => clearTimeout(timer);
+    if (question != "") {
+      if (time < 20) {
+        timer = setTimeout(() => {
+          setTime(time + 1);
+        }, 1000);
+        return () => clearTimeout(timer);
+      }
     }
 
   }, [questionNumber, socket, theme, time]);
@@ -59,9 +60,14 @@ export default function Quiz() {
     if (correctResponse.includes(response) || correctResponse === response || response.includes(correctResponse)) {
       setIsCorrect(true);
       setScore(score + 1);
-      console.log(time);
+      if (timer) {
+        clearTimeout(timer);
+      }
     }
     setOptionSelected(true);
+    if (timer) {
+      clearTimeout(timer);
+    }
     console.log(time);
   }
 
@@ -69,6 +75,9 @@ export default function Quiz() {
     setQuestionNumber(questionNumber + 1);
     setOptionSelected(false);
     setIsCorrect(false);
+    if (timer) {
+      clearTimeout(timer);
+    }
     setTime(0);
     socket.emit("quiz", {
       content: theme,
