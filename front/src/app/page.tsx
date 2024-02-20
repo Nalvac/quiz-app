@@ -17,7 +17,7 @@ export default function Home() {
   };
 
   const handleChatRedirect = () => {
-    const socket = io('http://localhost:4000');
+    const socket = io('http://localhost:3000');
     socket.on('connect', () => {
       const socketId = socket.id ?  socket.id : '';
       setSocketId(socketId);
