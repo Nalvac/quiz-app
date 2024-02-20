@@ -1,5 +1,5 @@
 'use client';
-import styles from "../../pages.module.scss"
+import styles from "../../../../pages.module.scss"
 import {Select, SelectOption} from "@/app/_.components/MultiSelect/page";
 import React, {useEffect, useState} from "react";
 import {useUser} from "@/context/userContext";
@@ -81,7 +81,7 @@ export default function RoomChoice() {
     socket.on('roomCreated', (message: string) => {
       console.log(message);
       toast.success(`${message}`);
-      router.push('/game/quiz_display')
+      router.push('/game/container')
     });
     setRoomConfig(roomConfig);
   };
@@ -162,7 +162,7 @@ export default function RoomChoice() {
           </div>
         </div>
         <span className={'d-flex justify-center align-items-center'}>Voulez vous vous connecté à une salle privé ?
-          <Link className={'text-blue-500'} href='/game/room_choice/joinRoom'> Cliquez ici</Link>
+          <Link className={'text-blue-500'} href='/game/room/choice/join'> Cliquez ici</Link>
         </span>
       </form>
     </div>

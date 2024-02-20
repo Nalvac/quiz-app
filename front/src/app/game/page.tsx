@@ -1,9 +1,7 @@
 'use client';
 
-import {useRouter} from 'next/navigation';
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 import styles from "../pages.module.scss"
-import {io} from "socket.io-client";
 import {useUser} from "@/context/userContext";
 import Link from "next/link";
 
@@ -28,7 +26,7 @@ export default function Game() {
           </p>
 
           <div className="w-300 mt-25 d-flex space-between">
-            <Link className="btn large btn-reverse-primary" href='/game/room_choice'>Salle Privé</Link>
+            <Link className="btn large btn-reverse-primary" href='/game/room/choice/join'>Salle Privé</Link>
             <Link className="btn large btn-reverse-primary" href='/game'>Salle Public</Link>
           </div>
         </div>

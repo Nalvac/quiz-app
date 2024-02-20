@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from "react";
-import styles from "../../../pages.module.scss";
+import styles from "../../../../pages.module.scss";
 import { useUser } from "@/context/userContext";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
@@ -39,7 +39,7 @@ export default function JoinRoom() {
           <button className='btn btn-reverse-primary mt-2' type='submit'>Rejoindre</button>
         </div>
         <span className={'d-flex justify-center align-items-center mt-5'}>Voulez vous creé à une salle privé ?
-          <Link className={'text-blue-500'} href='/game/room_choice'> Cliquez ici</Link>
+          <Link className={'text-blue-500'} href='/game/room/choice/create'> Cliquez ici</Link>
         </span>
       </form>
     </div>
