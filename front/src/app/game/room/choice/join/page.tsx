@@ -6,18 +6,18 @@ import Link from "next/link";
 import { useRouter } from 'next/navigation';
 
 export default function JoinRoom() {
-  const { socket, setIsAdmin, userContextName, setRoomId } = useUser();
+  const { socket, setIsAdmin, userContextName, setRoomId, setClientCount } = useUser();
   const [roomName, setRoomName] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-
     socket.emit('joinRoom', { roomId: roomName, isPrivate: true, password });
     socket.on('roomJoined', (data: { message: string, clientsCount: number, isAdmin: boolean, roomId: string }) => {
       setIsAdmin(data.isAdmin)
       setRoomId(data.roomId)
-      router.push('/game/container/quiz_display');
+      setClientCount(data.clientsCount)
+      router.push('/game/container');
     })
   };
 
