@@ -8,16 +8,9 @@ import {
 import { Socket } from 'socket.io';
 import { OpenAI } from 'openai';
 
-interface IMessage {
-  username: string;
-  content: string;
-  language: string;
-  timeSent: string;
-}
-
 interface IQuiz {
   question: string;
-  possibleResponses: Object;
+  possibleResponses: string[];
   correctResponse: string;
 }
 
@@ -31,7 +24,6 @@ export class QuizGateway implements OnGatewayConnection, OnGatewayDisconnect {
   server: Socket;
 
   clients: { client: Socket; username?: string }[] = [];
-  chatMessages: IMessage[] = [];
   quiz: IQuiz[] = [];
 
   openai = new OpenAI({
@@ -90,26 +82,6 @@ export class QuizGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.clients.push({
       client,
     });
-    client.emit('messages-old', this.chatMessages);
-  }
-
-  @SubscribeMessage('message-suggest')
-  async handleMessageSuggestion(client: any, payload: IMessage): Promise<void> {
-    const getSuggestions = await this.openai.chat.completions.create({
-      messages: [
-        {
-          role: 'user',
-          content: `J'écris un message, donne moi les suggestions à partir de ça : '${payload.content}' retourne moi que des suggestions sans rien d'autre`,
-        },
-      ],
-      model: 'gpt-3.5-turbo',
-    });
-
-    const result = getSuggestions.choices[0].message.content;
-    this.server.emit(
-      'message-suggest',
-      result.split('\n').map((item) => item.replace(/^\d+\.\s/, '')),
-    );
   }
 
   handleDisconnect(client: any) {
