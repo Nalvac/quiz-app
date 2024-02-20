@@ -7,7 +7,6 @@ import { ErrorSnackBar } from '@/app/_.components/Snackbar/Error';
 import { LoadingQuiz } from '@/app/_.components/LoadingQuiz/LoadingQuiz';
 import {useUser} from "@/context/userContext";
 
-
 interface IQuiz {
   question: string;
   possibleResponses: string[];
@@ -18,6 +17,10 @@ interface IQuiz {
 interface ITheme {
   content: string;
 }
+
+const socket = io(process.env.BACKEND_URL || "http://localhost:3000");
+
+
 export default function Quiz() {
   const [question, setQuestion] = useState<string>("");
   const [possibleResponses, setPossibleResponses] = useState<string[]>([]);
@@ -27,12 +30,11 @@ export default function Quiz() {
   const [optionSelected, setOptionSelected] = useState(false);
   const [time, setTime] = useState(0);
   const [questionNumber, setQuestionNumber] = useState(0);
-  const [totalQuestions, setTotalQuestions] = useState(10);
-  const [theme, setTheme] = useState("Mathématique");
-  let [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+  const [totalQuestions] = useState(10);
+  const [theme] = useState("Mathématique");
+  let [timer] = useState<NodeJS.Timeout | null>(null);
 
-
-  const {socket} = useUser()
+  //const {socket} = useUser();
 
   localStorage.setItem("questionNumber", questionNumber.toString());
   localStorage.setItem("score", score.toString());
