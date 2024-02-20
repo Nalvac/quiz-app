@@ -31,6 +31,14 @@ npm install
 npm run dev
 ```
 
+### GameInterface
+
+Dans le dossier, Installez les dépendances avec la commande suivante :
+
+```bash
+npm install
+```
+
 ### Backend
 
 Pour exécuter le backend, suivez les étapes suivantes :
