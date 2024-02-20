@@ -1,18 +1,59 @@
-- Create a `.env` file in the root of the server folder with the following content:
-- OPENAI_API_KEY=your_openai_api_key
+Voici une version améliorée de votre fichier `README.md` :
 
+```markdown
+# Nom du Projet
 
-# How to run the project
-#### front
-- npm install
-- npm run dev
+Ce projet a été réalisé par Amine Fajry, Nalvac Atinhounon et Nadia Schwaller.
 
-#### server
-- npm install
-- npm run start
+## Configuration
 
+Pour configurer le projet, créez un fichier `.env` à la racine du dossier du serveur avec le contenu suivant :
 
-or 
+```env
+OPENAI_API_KEY=your_openai_api_key
+```
 
-- docker-compose up
+## Comment exécuter le projet
 
+### Frontend
+
+Pour exécuter le frontend, suivez les étapes suivantes :
+
+1. Installez les dépendances avec la commande suivante :
+
+```bash
+npm install
+```
+
+2. Lancez le serveur de développement avec la commande suivante :
+
+```bash
+npm run dev
+```
+
+### Backend
+
+Pour exécuter le backend, suivez les étapes suivantes :
+
+1. Installez les dépendances avec la commande suivante :
+
+```bash
+npm install
+```
+
+2. Lancez le serveur avec la commande suivante :
+
+```bash
+npm run start
+```
+
+### Docker
+
+Alternativement, vous pouvez exécuter le projet avec Docker en utilisant la commande suivante :
+
+```bash
+docker-compose up
+```
+```
+
+Cette version du `README.md` est plus structurée et détaillée, ce qui facilite la compréhension pour les autres développeurs.

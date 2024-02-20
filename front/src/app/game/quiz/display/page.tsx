@@ -29,6 +29,8 @@ export default function Quiz() {
   const [totalQuestions, setTotalQuestions] = useState(10);
   const [theme, setTheme] = useState("Mathématique");
   let [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+  localStorage.setItem("questionNumber", questionNumber.toString());
+  localStorage.setItem("score", score.toString());
 
   useEffect(() => {
     socket.once("connect", () => {
@@ -39,7 +41,7 @@ export default function Quiz() {
     });
 
     socket.once("quiz", (data) => {
-      console.log(data);
+      let questionNumber = localStorage.getItem('questionNumber');
       setQuestion(data[questionNumber].question);
       setPossibleResponses(data[questionNumber].possibleResponses);
       setCorrectResponse(data[questionNumber].correctResponse);
@@ -68,7 +70,6 @@ export default function Quiz() {
     if (timer) {
       clearTimeout(timer);
     }
-    console.log(time);
   }
 
   const handleSubmit = () => {
@@ -82,45 +83,55 @@ export default function Quiz() {
     socket.emit("quiz", {
       content: theme,
     });
+    localStorage.setItem("score", score.toString());
+    localStorage.setItem("questionNumber", questionNumber.toString());
+  }
+
+  if (questionNumber === totalQuestions) {
+    return (
+      <div className={`d-flex justify-content-center align-items-center flex-column flex-fill`}>
+        <h1 className={`text-2xl text-black p-30`}>Votre score est de {score} / {totalQuestions}</h1>
+      </div>
+    )
+
   }
 
 	return(
     <div className={`d-flex justify-content-center align-items-center flex-column flex-fill`}>
-      <div className={`grid grid-cols-2`}>
-        <h1 className={`text-2xl text-black p-30`}>
-          {time}
-        </h1>
+          <div className={`grid grid-cols-2`}>
+            <h1 className={`text-2xl text-black p-30`}>
+              {time}
+            </h1>
 
-        <h1 className={`text-2xl text-black p-30`}>
-          {questionNumber + 1} / {totalQuestions}
-        </h1>
-      </div>
+            <h1 className={`text-2xl text-black p-30`}>
+              {questionNumber + 1} / {totalQuestions}
+            </h1>
+          </div>
 
-      {optionSelected ? (isCorrect ? <SuccessSnackBar /> : <ErrorSnackBar />) : null}
+          {optionSelected ? (isCorrect ? <SuccessSnackBar /> : <ErrorSnackBar />) : null}
 
-      {question ? null : <LoadingQuiz/>}
+          {question ? null : <LoadingQuiz/>}
 
 
-      <div className={` w-800 h-50`}>
-        <h1 className={`text-center text-2xl text-white p-30`}>
-          {question}
-        </h1>
-        <div className="grid grid-cols-2 gap-4">
-          {possibleResponses.map((option, index) => (
-            <button
-              key={index}
-              className="bg-white	text-black px-4 py-2 rounded hover:bg-primary"
-              onClick={() => handleResponse(option)}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
-        {optionSelected ? <div className={`mt-4 flex justify-end`}>
-          <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={() => handleSubmit}>Next</button>
-        </div> : null}
-      </div>
+          <div className={` w-800 h-50`}>
+            <h1 className={`text-center text-2xl text-white p-30`}>
+              {question}
+            </h1>
+            <div className="grid grid-cols-2 gap-4">
+              {possibleResponses.map((option, index) => (
+                <button
+                  key={index}
+                  className="bg-white	text-black px-4 py-2 rounded hover:bg-primary"
+                  onClick={() => handleResponse(option)}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+            {optionSelected ? <div className={`mt-4 flex justify-end`}>
+              <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={() => handleSubmit()}>Next</button>
+            </div> : null}
+          </div>
     </div>
-
   )
 }
