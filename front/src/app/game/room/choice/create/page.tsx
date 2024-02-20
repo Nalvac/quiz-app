@@ -5,7 +5,7 @@ import React, {useEffect, useState} from "react";
 import {useUser} from "@/context/userContext";
 import {useRouter} from "next/navigation";
 import {toast} from "react-toastify";
-import {GameRoom} from 'gameinterface/models';
+import { GameRoom } from 'gameInterface/models'
 import Link from "next/link";
 
 export default function RoomChoice() {
@@ -70,7 +70,8 @@ export default function RoomChoice() {
       difficultyLevels: difficulty ? difficulty.label : '',
       randomTheme: toggleThemeFiled,
       name: roomName,
-      password: roomPassWord
+      password: roomPassWord,
+      userName: userContextName
     };
 
     socket.emit('createRoom', roomConfig);

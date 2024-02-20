@@ -70,6 +70,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       createBY: client,
       name: roomConfig.name,
       password: roomConfig.password,
+      userName: roomConfig.userName
     };
 
     this.rooms.push(newRoom);
@@ -89,9 +90,9 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const room = this.getRoomById(roomId);
 
     if (room && room.createBY.id === client.id) {
-      this.server.to(roomId).emit('gameStarted', 'Le jeu a commencé !');
+      this.server.to(roomId).emit('gameStarted', {isStarted: true});
     } else {
-      client.emit('error', "Vous n'êtes pas autorisé à lancer le jeu.");
+      client.emit('gameStarted', {isStarted: true});
     }
   }
 
@@ -109,29 +110,36 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (room && room.password === password) {
       client.join(roomId);
 
-      if (room.createBY.id !== client.id) {
+      if (room.createBY.id != client.id) {
         room.clients.push(client);
       }
 
       const clientsCount = room.clients.length;
 
-      this.server.to(roomId).emit('roomJoined', {
-        message: `New user joined the private room ${roomId}`,
-        clientsCount: clientsCount,
-        isAdmin: room.createBY.id == client.id,
-        roomId: roomId,
-      });
+      if (room.createBY.id == client.id) {
+        client.emit('roomJoined', {
+          message: `New user joined the private room ${roomId}`,
+          clientsCount: clientsCount,
+          isAdmin: true,
+          roomId: roomId,
+        });
+      } else {
+        client.emit('roomJoined', {
+          message: `You've joined the private room ${roomId}`,
+          clientsCount: clientsCount,
+          isAdmin: false,
+          roomId: roomId,
+        });
+      }
 
-      client.emit('roomJoined', {
-        message: `You've joined the private room ${roomId}`,
+      this.server.to(room.createBY.id).emit('clientCount', {
         clientsCount: clientsCount,
-        isAdmin: room.createBY.id == client.id,
-        roomId: roomId,
-      });
+      })
     } else {
       client.emit('roomJoined', 'Invalid room or password');
     }
   }
+
 
   private joinOrCreatePublicRoom(client: Socket, roomId: string) {
     const publicRoom = this.rooms.find((room) => room.roomId === roomId);

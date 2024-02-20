@@ -3,7 +3,7 @@ Voici une version améliorée de votre fichier `README.md` :
 ```markdown
 # Nom du Projet
 
-Ce projet a été réalisé par Amine Fajry, Nalvac Atinhounon et Nadia Schwaller.
+Ce projet a été réalisé par Amine Fajry, Nalvac Atinhounon et Nadia Schwaller (Pairprogramming 99% du temps suite à un problème de pc).
 
 ## Configuration
 

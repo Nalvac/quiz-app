@@ -17,7 +17,8 @@ export interface GameRoom {
   themes?: string[];
   createBY?: Socket;
   difficultyLevels: string;
-  randomTheme: boolean
+  randomTheme: boolean;
+  userName?: string;
 }
 
 export interface Question {

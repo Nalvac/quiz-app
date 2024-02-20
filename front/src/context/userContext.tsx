@@ -16,6 +16,8 @@ interface ContextProps {
   setSocket: (value: Socket) => void,
   roomId: string | null,
   setRoomId: (value: string) => void,
+  clientCount: number | null,
+  setClientCount: (value: number) => void,
 }
 
 const userContext = createContext<ContextProps>({
@@ -28,7 +30,9 @@ const userContext = createContext<ContextProps>({
   isAdmin: false,
   setIsAdmin: value => {},
   setRoomId: value => {},
-  roomId: ''
+  roomId: '',
+  clientCount: 0,
+  setClientCount: value => {}
 });
 
 // @ts-ignore
@@ -36,13 +40,14 @@ export const UserContextProvider = ({children}) => {
   const [userContextName, setUserContextName] = useState('');
   const [socketId, setSocketId] = useState<string | null>(null);
   const [roomId, setRoomId] = useState<string | null>(null);
+  const [clientCount, setClientCount] = useState<number | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(false);
   const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap>>({} as Socket<DefaultEventsMap, DefaultEventsMap>);
 
   useEffect(() => {console.log(userContextName)}, [userContextName])
 
   return (
-    <userContext.Provider value={{ userContextName, setUserContextName, socketId, setSocketId,socket, setSocket, isAdmin, setIsAdmin, setRoomId, roomId  }}>
+    <userContext.Provider value={{ userContextName, setUserContextName, socketId, setSocketId,socket, setSocket, isAdmin, setIsAdmin, setRoomId, roomId, setClientCount, clientCount  }}>
       {children}
     </userContext.Provider>
   );
