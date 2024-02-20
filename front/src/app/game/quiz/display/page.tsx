@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { io } from "socket.io-client";
 
-const socket = io(process.env.BACKEND_URL || "http://localhost:4000")
+const socket = io(process.env.BACKEND_URL || "http://localhost:3000")
 
 interface IQuiz {
   question: string;

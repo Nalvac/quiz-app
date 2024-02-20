@@ -19,7 +19,7 @@ export default function RoomChoice() {
 					<button className='btn btn-primary mt-2'>Sauvegarder</button>
 					<span className='mt-15'>
 						<span style={{fontSize: `small`}}> Voulez vous rejoindre une salle
-							<a href='/game/room_choice/joinRoom' style={{color: `blue`}}> Cliquez ici</a>
+							<a href='/game/room/choice/join' style={{color: `blue`}}> Cliquez ici</a>
 						</span>
 					</span>
 				</div>
