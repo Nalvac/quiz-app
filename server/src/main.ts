@@ -1,12 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import {RedisIoAdapter} from "../services/redisIoAdapter";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const redisIoAdapter = new RedisIoAdapter(app);
-  await redisIoAdapter.connectToRedis();
-  app.useWebSocketAdapter(redisIoAdapter);
+  app.enableCors();
   await app.listen(4000);
 }
-bootstrap();
+bootstrap().then(() => console.log('Server is running on port 3000'));

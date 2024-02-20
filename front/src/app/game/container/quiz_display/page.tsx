@@ -1,11 +1,17 @@
 'use client';
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import SuggestedAnswerDisplay from "@/app/_.components/SuggestedAnswer/page";
 import Header from "@/app/_.components/Header/Header";
 import Footer from "@/app/_.components/Footer/Footer";
 import {inspect} from "util";
-import styles from "../../pages.module.scss"
+import styles from "../../../pages.module.scss"
+import {useUser} from "@/context/userContext";
 export default function Quiz() {
+  const { socket, isAdmin, userContextName } = useUser();
+
+  useEffect(() => {
+    console.log(isAdmin);
+  }, [])
 	return(
 			<>
 

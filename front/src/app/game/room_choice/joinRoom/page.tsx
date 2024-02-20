@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from 'next/navigation';
 
 export default function JoinRoom() {
-  const { socket, userContextName } = useUser();
+  const { socket, setIsAdmin, userContextName, setRoomId } = useUser();
   const [roomName, setRoomName] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
@@ -14,9 +14,10 @@ export default function JoinRoom() {
     event.preventDefault();
 
     socket.emit('joinRoom', { roomId: roomName, isPrivate: true, password });
-    socket.on('roomJoined', (mes: string) => {
-      console.log(mes);
-      router.push('/game/quiz_display')
+    socket.on('roomJoined', (data: { message: string, clientsCount: number, isAdmin: boolean, roomId: string }) => {
+      setIsAdmin(data.isAdmin)
+      setRoomId(data.roomId)
+      router.push('/game/container/quiz_display');
     })
   };
 

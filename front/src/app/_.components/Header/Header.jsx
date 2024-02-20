@@ -11,7 +11,6 @@ export default function Header() {
   const [clientsCount, setClientsCount] = useState(0);
   const { socket, userContextName } = useUser();
   const router = useRouter();
-  const socketRef = useRef(socket);
 
   useEffect(() => {
     if (!userContextName) {
@@ -19,19 +18,7 @@ export default function Header() {
       return;
     };
 
-    socketRef.current.on('roomJoined', (mes) => {setClientsCount((x) => x = mes.clientsCount)});
-
-    const handleRoomJoined = (mes) => {
-      console.log(mes.clientsCount);
-      setClientsCount(mes.clientsCount);
-    };
-
-    socketRef.current.off('roomJoined', (mes) => {setClientsCount((x) => x = mes.clientsCount)});
-
-    return () => {
-      socketRef.current.off('roomJoined', handleRoomJoined);
-    };
-  }, [userContextName, router, clientsCount]);
+  }, []);
 
 
   return (
@@ -40,7 +27,7 @@ export default function Header() {
           <h1 className={`font-bold text-2xl`}>Quiz App</h1>
       </div>
       <div className={`d-flex justify-center align-items-center ${styles.headerList}`}>
-        <p className={'p-4'}>{clientsCount} joueurs connecté</p>
+        <p className={'p-4'}>{userContextName}</p>
       </div>
       <i onClick={() => setShowMenu(true)} className={`fa-solid fa-bars mr-15  ${styles.headerXs}`}></i>
       {showMenu &&
