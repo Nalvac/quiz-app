@@ -42,7 +42,6 @@ export default function Quiz() {
 
     socket.once("quiz", (data) => {
       let questionNumber = localStorage.getItem('questionNumber');
-      console.log(data, questionNumber);
       setQuestion(data[questionNumber].question);
       setPossibleResponses(data[questionNumber].possibleResponses);
       setCorrectResponse(data[questionNumber].correctResponse);
@@ -71,7 +70,6 @@ export default function Quiz() {
     if (timer) {
       clearTimeout(timer);
     }
-    console.log(time);
   }
 
   const handleSubmit = () => {
