@@ -1,14 +1,23 @@
+import {Socket} from "socket.io";
+
 export interface Player {
   id: string;
   username: string;
   score: number;
+  isAdmin: boolean;
 }
 
 export interface GameRoom {
-  roomId: string;
-  theme: string;
-  players: Player[];
+  roomId?: string;
+  theme: Array<string>;
+  name: string,
+  password: string,
   isPrivate: boolean;
+  clients?: Socket[];
+  themes?: string[];
+  createBY?: Socket;
+  difficultyLevels: string;
+  randomTheme: boolean
 }
 
 export interface Question {
@@ -27,6 +36,7 @@ export interface PlayerAnswer {
 }
 
 export interface QuizConfig {
-  themes: string;
+  themes?: string[];
   difficultyLevels: string;
+  randomTheme: boolean
 }

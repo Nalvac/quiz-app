@@ -3,7 +3,9 @@ import { Inter } from "next/font/google";
 import "@/app/assets/styles/index.scss";
 import './index.css'
 import styles from  "./body.module.scss"
+import React from "react";
 const inter = Inter({ subsets: ["latin"] });
+import {UserContextProvider} from "../context/userContext";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,7 +19,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} ${styles.bodyContainer}`}>{children}</body>
+      <body className={`${inter.className} ${styles.bodyContainer}`}>
+        <UserContextProvider>
+          {children}
+        </UserContextProvider>
+      </body>
     </html>
   );
 }
