@@ -20,7 +20,6 @@ export interface GameRoom {
   randomTheme: boolean
 }
 
-
 export interface Question {
   id: string;
   theme: string;

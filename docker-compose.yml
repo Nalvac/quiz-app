@@ -1,23 +1,32 @@
-version: '3'
+version: '3.1'
+networks:
+  app_network:
+    name: fastnetwork
+    driver: bridge
 
 services:
-  mysql:
-    image: mysql:latest
-    environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: mydatabase
-      MYSQL_USER: myuser
-      MYSQL_PASSWORD: mypassword
+  backend:
+    build: server
+    ports:
+      - "3000:3000"
     volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "3307:3306"
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest
+      - ./server:/app
+      - /app/node_modules
     environment:
-      PMA_HOST: mysql
-      PMA_USER: root
-      PMA_PASSWORD: root_password
+      - NODE_ENV=development
+    networks:
+      - app_network
+
+  frontend:
+    build: front
     ports:
-      - "8000:80"
+      - "5100:5100"
+    volumes:
+      - ./front:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - backend
+    networks:
+      - app_network

@@ -7,13 +7,6 @@ import { QuizGateway } from './quiz.gateway';
 dotenv.config();
 @Module({
   controllers: [QuizController],
-  providers: [
-    QuizController,
-    QuizGateway,
-    // {
-    //   provide: OpenAI,
-    //   useValue: new OpenAI({ apiKey: process.env['OPENAI_API_KEY'] }),
-    // },
-  ],
+  providers: [QuizController, QuizGateway],
 })
 export class QuizModule {}

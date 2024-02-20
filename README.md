@@ -1,15 +1,18 @@
-# quiz-app
+- Create a `.env` file in the root of the server folder with the following content:
+- OPENAI_API_KEY=your_openai_api_key
 
 
+# How to run the project
 #### front
+- npm install
+- npm run dev
 
-cd front
-npm install
-npm start
+#### server
+- npm install
+- npm run start
 
-### server
 
-Retourner à la racine du projet cd ..
-cd server
-npm install
-npm run start
+or 
+
+- docker-compose up
+
