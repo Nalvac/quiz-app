@@ -65,7 +65,7 @@ export default function RoomChoice() {
 
   const handleRoomConfig = () => {
     const roomConfig: GameRoom = {
-      theme: theme.map(t => t.label),
+      themes: theme.map(t => t.label),
       isPrivate: true,
       difficultyLevels: difficulty ? difficulty.label : '',
       randomTheme: toggleThemeFiled,

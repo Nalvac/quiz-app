@@ -7,6 +7,7 @@ import {
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { GameRoom } from 'gameinterface/models';
+import {RoomsService} from "./room.service";
 
 @WebSocketGateway()
 export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -14,7 +15,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   rooms: GameRoom[] = [];
 
-  constructor() {}
+  constructor(private roomSrv: RoomsService) {}
   handleDisconnect(client: Socket) {
     console.log(`Client disconnected: ${client.id}`);
 
@@ -65,12 +66,12 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       randomTheme: roomConfig.randomTheme,
       roomId: roomId,
       clients: [client],
-      theme: roomConfig.theme,
+      themes: roomConfig.themes,
       isPrivate: true,
       createBY: client,
       name: roomConfig.name,
       password: roomConfig.password,
-      userName: roomConfig.userName
+      userName: roomConfig.userName,
     };
 
     this.rooms.push(newRoom);
@@ -79,6 +80,16 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       'roomCreated',
       `Room created successfully ${newRoom.createBY.id}`,
     );
+
+    console.log(roomConfig.themes);
+
+     this.roomSrv.generateQuestions(roomConfig.themes, 4).then((questions) => {
+       newRoom.questions = questions;
+
+       console.log(newRoom.questions);
+     });
+
+
   }
 
   @SubscribeMessage('startGame')
@@ -90,6 +101,8 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const room = this.getRoomById(roomId);
 
     if (room && room.createBY.id === client.id) {
+
+      this.server.to(roomId).emit('questions', room.questions);
       this.server.to(roomId).emit('gameStarted', {isStarted: true});
     } else {
       client.emit('gameStarted', {isStarted: true});
