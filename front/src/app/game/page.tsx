@@ -4,11 +4,17 @@ import React, {useEffect} from "react";
 import styles from "../pages.module.scss"
 import {useUser} from "@/context/userContext";
 import Link from "next/link";
+import {useRouter} from "next/navigation";
 
 export default function Game() {
   const {socket, userContextName} = useUser();
+  const router = useRouter();
+
   useEffect(() => {
-    console.log(userContextName);
+    if (!userContextName) {
+      router?.push('/');
+      return;
+    }
   }, []);
 
   return (

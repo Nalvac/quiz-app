@@ -7,7 +7,7 @@ import {
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { GameRoom } from 'gameinterface/models';
-import {RoomsService} from "./room.service";
+import { RoomsService } from './room.service';
 
 @WebSocketGateway()
 export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -83,29 +83,27 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     console.log(roomConfig.themes);
 
-     this.roomSrv.generateQuestions(roomConfig.themes, 4).then((questions) => {
-       newRoom.questions = questions;
-
-       console.log(newRoom.questions);
-     });
-
-
+    this.roomSrv.generateQuestions(roomConfig.themes, 4).then((questions) => {
+      newRoom.questions = questions;
+    });
   }
 
   @SubscribeMessage('startGame')
-  handleStartGame(client: Socket, roomId: string) {
-    this.startGame(client, roomId);
+  handleStartGame(client: Socket, data: { roomId }) {
+    this.startGame(client, data.roomId);
   }
 
   private startGame(client: Socket, roomId: string) {
     const room = this.getRoomById(roomId);
-
-    if (room && room.createBY.id === client.id) {
-
-      this.server.to(roomId).emit('questions', room.questions);
-      this.server.to(roomId).emit('gameStarted', {isStarted: true});
+    if (room) {
+      const questions = room.questions;
+      room.clients.forEach((c) => {
+        this.server
+          .to(c.id)
+          .emit('gameStarted', { isStarted: true, questions });
+      });
     } else {
-      client.emit('gameStarted', {isStarted: true});
+      client.emit('gameStarted', { isStarted: true });
     }
   }
 
@@ -124,8 +122,12 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.join(roomId);
 
       if (room.createBY.id != client.id) {
-        room.clients.push(client);
+        room.clients = [...room.clients, client];
       }
+
+      room.clients.forEach((e) => {
+        console.log(e.id);
+      });
 
       const clientsCount = room.clients.length;
 
@@ -134,25 +136,24 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           message: `New user joined the private room ${roomId}`,
           clientsCount: clientsCount,
           isAdmin: true,
-          roomId: roomId,
+          roomId: room.roomId,
         });
       } else {
         client.emit('roomJoined', {
           message: `You've joined the private room ${roomId}`,
           clientsCount: clientsCount,
           isAdmin: false,
-          roomId: roomId,
+          roomId: room.roomId,
         });
       }
 
       this.server.to(room.createBY.id).emit('clientCount', {
         clientsCount: clientsCount,
-      })
+      });
     } else {
       client.emit('roomJoined', 'Invalid room or password');
     }
   }
-
 
   private joinOrCreatePublicRoom(client: Socket, roomId: string) {
     const publicRoom = this.rooms.find((room) => room.roomId === roomId);
