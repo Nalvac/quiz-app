@@ -9,7 +9,6 @@ export interface Player {
 
 export interface GameRoom {
   roomId?: string;
-  theme: Array<string>;
   name: string,
   password: string,
   isPrivate: boolean;
@@ -19,6 +18,7 @@ export interface GameRoom {
   difficultyLevels: string;
   randomTheme: boolean;
   userName?: string;
+  questions?: any;
 }
 
 export interface Question {
@@ -27,6 +27,7 @@ export interface Question {
   text: string;
   options: string[];
   correctAnswer: string;
+  roomId: string;
 }
 
 export interface PlayerAnswer {
