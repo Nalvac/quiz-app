@@ -1,18 +1,31 @@
 'use client'
 
 
-import React, { useState } from "react";
-import {QuestionGen, UserAnswer} from 'gameinterface/models'
+import React, { useState, useEffect } from "react";
+import { QuestionGen, UserAnswer } from "gameinterface/models";
+import {useUser} from "@/context/userContext";
 
-const SuggestedAnswerDisplay: React.FC<{ questions: QuestionGen[] }> = ({ questions }) => {
+const SuggestedAnswerDisplay: React.FC<{ questions: QuestionGen[] , onGameEnd: (score: number, playerName: string) => void}> = ({ questions, onGameEnd}) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Array<UserAnswer>>([]);
+  const [isCorrectAnswerSelected, setIsCorrectAnswerSelected] =  useState<boolean | null>(null);
+  const {userContextName} = useUser();
+
+  useEffect(() => {
+    setIsCorrectAnswerSelected(null);
+  }, [currentQuestionIndex]);
 
   const currentQuestion = questions[currentQuestionIndex];
+  const isQuestionAnswered = userAnswers.some(
+    (answer) => answer.question === currentQuestion.question
+  );
 
   const handleNextQuestion = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
+    }else {
+      const score = userAnswers.filter((answer) => answer.isCorrect).length;
+      onGameEnd(score, userContextName);
     }
   };
 
@@ -22,13 +35,19 @@ const SuggestedAnswerDisplay: React.FC<{ questions: QuestionGen[] }> = ({ questi
     }
   };
 
-  const handleAnswerClick = (response: string) => {
+  const handleAnswerClick = (response: string, correctAnswer: string) => {
+    if (isQuestionAnswered) {
+      return;
+    }
+
+    const isCorrect = response === correctAnswer;
     const userAnswer = {
       question: currentQuestion.question,
       response: response,
+      isCorrect: isCorrect,
     };
     setUserAnswers([...userAnswers, userAnswer]);
-    handleNextQuestion();
+    setIsCorrectAnswerSelected(isCorrect);
   };
 
   return (
@@ -37,17 +56,40 @@ const SuggestedAnswerDisplay: React.FC<{ questions: QuestionGen[] }> = ({ questi
         {currentQuestion.question}
       </h2>
       <div className="grid grid-cols-2 gap-4">
-        {currentQuestion.possibleResponses.map((response: string, index: number) => (
-          <button
-            key={index}
-            className="bg-white	text-black px-4 py-2 rounded hover:bg-primary"
-            onClick={() => handleAnswerClick(response)}
-          >
-            {response}
-          </button>
-        ))}
+        {currentQuestion.possibleResponses.map(
+          (response: string, index: number) => {
+            const formattedResponse = response.toLowerCase().trim();
+            const formattedCorrectAnswer = currentQuestion.correctAnswer.toLowerCase().trim();
+
+            return (
+              <button
+                key={index}
+                className={`${
+                  isCorrectAnswerSelected !== null &&
+                  formattedResponse === formattedCorrectAnswer
+                    ? "bg-green-500"
+                    : isCorrectAnswerSelected === false &&
+                    formattedResponse === formattedCorrectAnswer
+                      ? "bg-red-500"
+                      : isQuestionAnswered && formattedResponse === formattedCorrectAnswer
+                        ? "bg-green-500"
+                        : isQuestionAnswered
+                          ? "bg-red-500"
+                          : "bg-white"
+                } text-black px-4 py-2 rounded hover:bg-primary`}
+                onClick={() =>
+                  handleAnswerClick(formattedResponse, formattedCorrectAnswer)
+                }
+                disabled={isCorrectAnswerSelected !== null || isQuestionAnswered}
+              >
+                {response}
+              </button>
+            );
+          }
+        )}
+
       </div>
-      <div className={'d-flex mt-5 w-600 space-between'}>
+      <div className={"d-flex mt-5 w-600 space-between"}>
         <button
           className={"btn btn-primary"}
           onClick={handlePrevQuestion}
@@ -58,14 +100,14 @@ const SuggestedAnswerDisplay: React.FC<{ questions: QuestionGen[] }> = ({ questi
         <button
           className={"btn btn-primary"}
           onClick={handleNextQuestion}
-          disabled={currentQuestionIndex === questions.length - 1}
         >
           Suivant
         </button>
       </div>
     </>
   );
-}
+};
 
 export default SuggestedAnswerDisplay;
+
 

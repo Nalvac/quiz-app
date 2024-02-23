@@ -7,7 +7,7 @@ import Link from "next/link";
 import {useRouter} from "next/navigation";
 
 export default function Game() {
-  const {socket, userContextName} = useUser();
+  const {socket, userContextName, setRoomId} = useUser();
   const router = useRouter();
 
   const [clientsCount, setClientsCount] = useState(0);
@@ -20,6 +20,10 @@ export default function Game() {
 
   const joinPublicRoom = () => {
     socket.emit('joinRoom', { roomId: '', isPrivate: false, password: '' });
+    socket.on('roomJoined', (data: { roomId: string }) => {
+      setRoomId(data.roomId);
+      router.push('/game/container');
+    })
     router.push('/game/container')
 
   };

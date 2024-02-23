@@ -37,4 +37,5 @@ export interface  QuestionGen{
 export interface UserAnswer {
   question: string;
   response: string;
+  isCorrect: boolean;
 }

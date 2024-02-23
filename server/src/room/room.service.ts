@@ -50,10 +50,13 @@ export class RoomsService {
             )
             .slice(0, 4);
 
-          const correctAnswer = quiz
+          const correctAnswerLine = quiz
             .split('\n')
-            .find((line) => line.includes('Réponse correcte :'))
-            .replace('Réponse correcte : ', '');
+            .find((line) => line.includes('Réponse correcte :'));
+
+          const correctAnswer = correctAnswerLine
+            ? correctAnswerLine.replace('Réponse correcte : ', '')
+            : 'Aucune réponse correcte trouvée';
 
           return {
             question,

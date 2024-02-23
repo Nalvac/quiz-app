@@ -13,7 +13,8 @@ export default function Game() {
   const { socket, isAdmin, userContextName, roomId,clientCount,setIsAdmin, setClientCount } = useUser();
   const [isStarted, setIsStarted] = useState(false)
   const [questions, setQuestions] = useState<QuestionGen[]>([])
-
+  const [winner, setWinner] = useState(null);
+  const [winnerScore, setWinnerScore] = useState(null);
 
   socket.on('clientCount', (data: { clientsCount: number}) => {
     setClientCount(data.clientsCount)
@@ -23,6 +24,17 @@ export default function Game() {
     setIsStarted(data.isStarted);
     setQuestions(data.questions);
   });
+
+
+  socket.on('gameResult', ({ winner }) => {
+    console.log(winner);
+    setWinner(winner);
+  });
+
+  const handleGameEnd = (score: number, playerName: string) => {
+    console.log(`${playerName} a obtenu un score de ${score}`);
+    socket.emit("gameEnd", { playerName, score, roomId });
+  };
 
   const handleStartGame = (roomId: string | null) => {
     socket.emit('startGame', { roomId });
@@ -51,7 +63,16 @@ export default function Game() {
 
         <p className={'p-2 text-x italic p-2 rounded bg-primary mt-2'}>Vous êtes {clientCount ?  clientCount : 'le premier joueur' }  dans la salle</p>
 
-        {isStarted && questions &&  <SuggestedAnswerDisplay   questions={questions}/> }
+        {isStarted && questions &&  <SuggestedAnswerDisplay   questions={questions} onGameEnd={handleGameEnd}/> }
+
+
+        <div>
+          {winner !== null && (
+            <div>
+              <p>Le gagnant est {winner} avec un score de {winnerScore} points !</p>
+            </div>
+          )}
+        </div>
 
       </div>
       <Footer />

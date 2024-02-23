@@ -14,6 +14,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 
   rooms: GameRoom[] = [];
+  private playerScores: { [key: string]: number } = {};
 
   constructor(private roomSrv: RoomsService) {}
   handleDisconnect(client: Socket) {
@@ -47,7 +48,6 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (isPrivate) {
       this.joinPrivateRoom(client, roomId, password);
     } else {
-      console.log('ici');
       this.joinOrCreatePublicRoom(client);
     }
   }
@@ -81,8 +81,6 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       'roomCreated',
       `Room created successfully ${newRoom.createBY.id}`,
     );
-
-    console.log(roomConfig.themes);
 
     this.roomSrv.generateQuestions(roomConfig.themes, 4).then((questions) => {
       newRoom.questions = questions;
@@ -125,10 +123,6 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (room.createBY.id != client.id) {
         room.clients = [...room.clients, client];
       }
-
-      room.clients.forEach((e) => {
-        console.log(e.id);
-      });
 
       const clientsCount = room.clients.length;
 
@@ -188,13 +182,17 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
 
     client.join(roomId);
-    client.emit('roomJoined', `You've joined the public room ${roomId}`);
+    client.emit('roomJoined', {
+      roomId: newRoom.roomId,
+    });
   }
 
   private joinPublicRoom(client: Socket, room: GameRoom) {
     room.clients.push(client);
     client.join(room.roomId);
-    client.emit('roomJoined', `You've joined the public room ${room.roomId}`);
+    client.emit('roomJoined', {
+      roomId: room.roomId,
+    });
 
     if (room.clients.length >= 2) {
       this.startGame(client, room.roomId);
@@ -206,5 +204,57 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(room.roomId).emit('clientCount', {
       clientsCount,
     });
+  }
+
+  @SubscribeMessage('gameEnd')
+  handleGameEnd(
+    client: Socket,
+    {
+      playerName,
+      score,
+      roomId,
+    }: { playerName: string; score: number; roomId: string },
+  ) {
+    this.playerScores[client.id] = score;
+
+    const room = this.getRoomById(roomId);
+
+    console.log(this.playerScores);
+
+    if (
+      room &&
+      room.clients.every((c) => this.playerScores[c.id] !== undefined)
+    ) {
+      const winner = this.calculateWinner(room);
+
+      console.log(winner);
+
+      room.clients.forEach((client) => {
+        this.server.to(client.id).emit('gameResult', { winner });
+      });
+    }
+  }
+
+  private calculateWinner(
+    room: GameRoom,
+  ): { playerName: string; score: number } | null {
+    let maxScore = -1;
+    let winner: { playerName: string; score: number } | null = null;
+
+    room.clients.forEach((client) => {
+      const score = this.playerScores[client.id] || 0;
+      if (score > maxScore) {
+        maxScore = score;
+        winner = { playerName: client.id, score };
+      }
+    });
+
+    return winner;
+  }
+
+  getRoomByClient(clientId: string): GameRoom | undefined {
+    return this.rooms.find((room) =>
+      room.clients.some((client) => client.id === clientId),
+    );
   }
 }
