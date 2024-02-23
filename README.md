@@ -13,7 +13,11 @@ Pour configurer le projet, créez un fichier `.env` à la racine du dossier du s
 OPENAI_API_KEY=your_openai_api_key
 ```
 
-## Comment exécuter le projet
+## Comment exécuter le projet avec docker compose
+
+```
+docker-compose up --build
+```
 
 ### Frontend
 
