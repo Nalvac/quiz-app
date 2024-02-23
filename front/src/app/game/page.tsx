@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import styles from "../pages.module.scss"
 import {useUser} from "@/context/userContext";
 import Link from "next/link";
@@ -9,6 +9,20 @@ import {useRouter} from "next/navigation";
 export default function Game() {
   const {socket, userContextName} = useUser();
   const router = useRouter();
+
+  const [clientsCount, setClientsCount] = useState(0);
+
+
+  socket.on('clientCount', (data) => {
+    console.log(data);
+    setClientsCount(data.clientsCount);
+  });
+
+  const joinPublicRoom = () => {
+    socket.emit('joinRoom', { roomId: '', isPrivate: false, password: '' });
+    router.push('/game/container')
+
+  };
 
   useEffect(() => {
     if (!userContextName) {
@@ -33,7 +47,7 @@ export default function Game() {
 
           <div className="w-300 mt-25 d-flex space-between">
             <Link className="btn large btn-reverse-primary" href='/game/room/choice/join'>Salle Privé</Link>
-            <Link className="btn large btn-reverse-primary" href='/game'>Salle Public</Link>
+            <button className="btn large btn-reverse-primary" onClick={joinPublicRoom}>Salle Public</button>
           </div>
         </div>
       </div>

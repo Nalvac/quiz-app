@@ -9,8 +9,8 @@ export interface Player {
 
 export interface GameRoom {
   roomId?: string;
-  name: string,
-  password: string,
+  name?: string,
+  password?: string,
   isPrivate: boolean;
   clients?: Socket[];
   themes?: string[];
@@ -18,16 +18,7 @@ export interface GameRoom {
   difficultyLevels: string;
   randomTheme: boolean;
   userName?: string;
-  questions?: any;
-}
-
-export interface Question {
-  id: string;
-  theme: string;
-  text: string;
-  options: string[];
-  correctAnswer: string;
-  roomId: string;
+  questions?: Array<QuestionGen>;
 }
 
 export interface PlayerAnswer {
@@ -37,8 +28,13 @@ export interface PlayerAnswer {
   isCorrect: boolean;
 }
 
-export interface QuizConfig {
-  themes?: string[];
-  difficultyLevels: string;
-  randomTheme: boolean
+export interface  QuestionGen{
+  question: string,
+  possibleResponses: Array<string>,
+  correctAnswer: string
+}
+
+export interface UserAnswer {
+  question: string;
+  response: string;
 }

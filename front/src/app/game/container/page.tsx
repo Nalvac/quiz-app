@@ -7,11 +7,12 @@ import {useUser} from "@/context/userContext";
 import { useRouter } from "next/navigation";
 import {useEffect, useState} from "react";
 import SuggestedAnswerDisplay from "@/app/_.components/SuggestedAnswer/page";
+import {QuestionGen} from  'gameinterface/models'
 export default function Game() {
   const router = useRouter();
   const { socket, isAdmin, userContextName, roomId,clientCount,setIsAdmin, setClientCount } = useUser();
   const [isStarted, setIsStarted] = useState(false)
-  const [questions, setQuestions] = useState<any[]>([])
+  const [questions, setQuestions] = useState<QuestionGen[]>([])
 
 
   socket.on('clientCount', (data: { clientsCount: number}) => {
@@ -19,7 +20,6 @@ export default function Game() {
   });
 
   socket.on('gameStarted', (data: { isStarted: boolean; questions: any[] }) => {
-    console.log(data);
     setIsStarted(data.isStarted);
     setQuestions(data.questions);
   });
@@ -41,14 +41,18 @@ export default function Game() {
         {isAdmin ? (
           <>
             {!isStarted && <button className={'btn-primary p-3 rounded mt-5'} onClick={() => handleStartGame(roomId)}>Lancer le jeu</button> }
-            <p className={'p-2 text-x italic p-2 rounded bg-primary'}>{clientCount} joueurs dans la salle</p>
           </>
         ) : (
           <>
+            {/* eslint-disable-next-line react/no-unescaped-entities */}
             {!isStarted && <p className={'text-white flex justify-center text-xl p-3'}>Attendez que l'administrateur lance la partie...</p>}
           </>
         )}
+
+        <p className={'p-2 text-x italic p-2 rounded bg-primary mt-2'}>Vous êtes {clientCount ?  clientCount : 'le premier joueur' }  dans la salle</p>
+
         {isStarted &&  <SuggestedAnswerDisplay   questions={questions}/> }
+
       </div>
       <Footer />
     </div>

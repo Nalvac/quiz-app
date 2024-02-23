@@ -88,6 +88,14 @@ export default function RoomChoice() {
     setTheme(randomThemes);
   };
 
+
+  useEffect(() => {
+    if (!userContextName) {
+      router?.push('/');
+      return;
+    }
+  }, []);
+
   return (
     <div className={`d-flex flex-column justify-content-center align-items-center ${styles.appContainer}`}>
       <form className={`d-flex flex-column card p-30  ${styles.recipeForm}`}>

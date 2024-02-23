@@ -11,8 +11,16 @@ export class RoomsService {
     });
   }
 
-
-  async generateQuestions(themes: string[], numQuestions: number): Promise<{ question: string; possibleResponses: string[] }[]> {
+  async generateQuestions(
+    themes: string[],
+    numQuestions: number,
+  ): Promise<
+    {
+      question: string;
+      possibleResponses: string[];
+      correctAnswer: string;
+    }[]
+  > {
     const quizPromises = themes.map(async (theme) => {
       const results = await Promise.all(
         Array.from({ length: numQuestions }, async (_, index) => {
@@ -31,22 +39,28 @@ export class RoomsService {
           const quiz = result.choices[0].message.content;
           const question = quiz.split('\n')[0].replace('Question: ', '');
           const possibleResponses = quiz
-          .split('\n')
-          .slice(1)
-          .filter(
-            (line) =>
-              line.trim() !== '' && // Exclude empty strings
-              !line.includes('Réponses possibles :') &&
-              !line.includes('Réponses:') &&
-              !line.includes('Réponses :')
-          )
-          .slice(0, 4);
+            .split('\n')
+            .slice(1)
+            .filter(
+              (line) =>
+                line.trim() !== '' && // Exclude empty strings
+                !line.includes('Réponses possibles :') &&
+                !line.includes('Réponses:') &&
+                !line.includes('Réponses :'),
+            )
+            .slice(0, 4);
+
+          const correctAnswer = quiz
+            .split('\n')
+            .find((line) => line.includes('Réponse correcte :'))
+            .replace('Réponse correcte : ', '');
 
           return {
             question,
             possibleResponses,
+            correctAnswer,
           };
-        })
+        }),
       );
 
       return results;
