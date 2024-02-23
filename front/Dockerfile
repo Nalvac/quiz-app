@@ -1,16 +1,14 @@
-# Dockerfile
-FROM node:18
+# Utilisez l'image Node.js en tant qu'image de base
+FROM node:21-alpine
 
+# Définir le répertoire de travail dans le conteneur
 WORKDIR /app
 
-COPY package*.json ./
-
-COPY ../GameInterface/. ../GameInterface/
-
-RUN npm install
-
+# Copier les fichiers du front-end dans le conteneur
 COPY . .
 
-EXPOSE 5100
+# Installer les dépendances
+RUN npm install
 
-CMD [ "npm", "run", "dev" ]
+# Commande par défaut à exécuter lorsque le conteneur démarre
+CMD ["npm", "run dev"]

@@ -1,14 +1,14 @@
-# Dockerfile
+# Utilisez l'image Node.js en tant qu'image de base
 FROM node:18
 
+# Définir le répertoire de travail dans le conteneur
 WORKDIR /app
 
-COPY package*.json ./
-
-RUN npm install
-
+# Copier les fichiers du serveur dans le conteneur
 COPY . .
 
-EXPOSE 3000
+# Installer les dépendances
+RUN npm install
 
-CMD [ "npm", "run", "start:dev" ]
+# Commande par défaut à exécuter lorsque le conteneur démarre
+CMD ["npm", "run start:dev"]

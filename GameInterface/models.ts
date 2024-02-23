@@ -1,11 +1,5 @@
 import {Socket} from "socket.io";
 
-export interface Player {
-  id: string;
-  username: string;
-  score: number;
-  isAdmin: boolean;
-}
 
 export interface GameRoom {
   roomId?: string;
@@ -21,12 +15,6 @@ export interface GameRoom {
   questions?: Array<QuestionGen>;
 }
 
-export interface PlayerAnswer {
-  playerId: string;
-  questionId: string;
-  chosenOption: string;
-  isCorrect: boolean;
-}
 
 export interface QuestionGen {
   question: string,

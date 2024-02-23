@@ -6,15 +6,41 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
-import { GameRoom } from 'gameinterface/models';
 import { RoomsService } from './room.service';
 
+export interface GameRoom {
+  roomId?: string;
+  name?: string;
+  password?: string;
+  isPrivate: boolean;
+  clients?: Socket[];
+  themes?: string[];
+  createBY?: Socket;
+  difficultyLevels: string;
+  randomTheme: boolean;
+  userName?: string;
+  questions?: Array<QuestionGen>;
+}
+
+export interface QuestionGen {
+  question: string;
+  possibleResponses: Array<string>;
+  correctAnswer: string;
+}
+
+export interface Winner {
+  clientId: string;
+  score: number;
+  playerName: string;
+}
 @WebSocketGateway()
 export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 
   rooms: GameRoom[] = [];
-  private playerScores: { [key: string]: number } = {};
+  private playerScores: {
+    [clientId: string]: { playerName: string; score: number };
+  } = {};
 
   constructor(private roomSrv: RoomsService) {}
   handleDisconnect(client: Socket) {
@@ -215,7 +241,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       roomId,
     }: { playerName: string; score: number; roomId: string },
   ) {
-    this.playerScores[client.id] = score;
+    this.playerScores[client.id] = { playerName, score };
 
     const room = this.getRoomById(roomId);
 
@@ -225,7 +251,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       room &&
       room.clients.every((c) => this.playerScores[c.id] !== undefined)
     ) {
-      const winner = this.calculateWinner(room, playerName);
+      const winner = this.calculateWinner(room);
 
       room.clients.forEach((client) => {
         this.server.to(client.id).emit('gameResult', { winner });
@@ -233,19 +259,20 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  private calculateWinner(
-    room: GameRoom,
-    playerName: string,
-  ): { clientId: string; score: number; playerName: string } | null {
+  private calculateWinner(room: GameRoom): Winner | null {
     let maxScore = -1;
     let winner: { clientId: string; score: number; playerName: string } | null =
       null;
 
     room.clients.forEach((client) => {
-      const score = this.playerScores[client.id] || 0;
-      if (score > maxScore) {
-        maxScore = score;
-        winner = { clientId: client.id, score, playerName: playerName };
+      const scoreData = this.playerScores[client.id];
+      if (scoreData && scoreData.score > maxScore) {
+        maxScore = scoreData.score;
+        winner = {
+          clientId: client.id,
+          score: scoreData.score,
+          playerName: scoreData.playerName,
+        };
       }
     });
 

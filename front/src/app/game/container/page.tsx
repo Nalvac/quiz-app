@@ -10,11 +10,10 @@ import SuggestedAnswerDisplay from "@/app/_.components/SuggestedAnswer/page";
 import {QuestionGen, Winner} from 'gameinterface/models'
 export default function Game() {
   const router = useRouter();
-  const { socket, isAdmin, userContextName, roomId,clientCount,setIsAdmin, setClientCount } = useUser();
+  const { socket, isAdmin, userContextName, roomId,clientCount, setClientCount } = useUser();
   const [isStarted, setIsStarted] = useState(false)
   const [questions, setQuestions] = useState<QuestionGen[]>([])
   const [winner, setWinner] = useState<Winner | null>(null);
-  const [winnerScore, setWinnerScore] = useState(null);
 
   socket.on('clientCount', (data: { clientsCount: number}) => {
     setClientCount(data.clientsCount)
@@ -81,12 +80,19 @@ export default function Game() {
           </>
         )}
 
-
-
         <div>
           {winner !== null && (
             <div>
-              <p className={'p-2 text-2xl text-white font-bold'} >Le gagnant est {winner.playerName} avec un score de {winner.score} points !</p>
+              <p className={'p-2 text-2xl text-white font-bold'} >
+                {
+                  winner && (
+                    winner.clientId != socket.id ? (
+                      <p>Le gagnant est {winner.playerName} avec un score de {winner.score} points !</p>
+                    ) :
+                      (<p>Vous êtes le gagnant avec {winner.score} points !</p>)
+                  )
+                }
+              </p>
             </div>
           )}
         </div>

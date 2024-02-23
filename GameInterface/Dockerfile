@@ -1,6 +1,13 @@
-# Dockerfile
+# Utilisez l'image Node.js en tant qu'image de base
 FROM node:18
 
-WORKDIR /app
+# Définir le répertoire de travail dans le conteneur
+WORKDIR /app/GameInterface
 
-COPY package*.json ./
+# Copier les fichiers du GameInterface dans le conteneur
+COPY . .
+
+# Installer les dépendances
+RUN npm install
+
+
