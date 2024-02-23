@@ -182,7 +182,11 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       createBY: client,
     };
 
-    this.rooms.push(newRoom);
+    this.roomSrv.generateQuestions(['Science'], 4).then((questions) => {
+      newRoom.questions = questions;
+      this.rooms.push(newRoom);
+    });
+
     client.join(roomId);
     client.emit('roomJoined', `You've joined the public room ${roomId}`);
   }
@@ -191,6 +195,10 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     room.clients.push(client);
     client.join(room.roomId);
     client.emit('roomJoined', `You've joined the public room ${room.roomId}`);
+
+    if (room.clients.length >= 2) {
+      this.startGame(client, room.roomId);
+    }
   }
 
   private notifyClientCount(room: GameRoom) {

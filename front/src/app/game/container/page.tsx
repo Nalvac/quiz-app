@@ -51,7 +51,7 @@ export default function Game() {
 
         <p className={'p-2 text-x italic p-2 rounded bg-primary mt-2'}>Vous êtes {clientCount ?  clientCount : 'le premier joueur' }  dans la salle</p>
 
-        {isStarted &&  <SuggestedAnswerDisplay   questions={questions}/> }
+        {isStarted && questions &&  <SuggestedAnswerDisplay   questions={questions}/> }
 
       </div>
       <Footer />
