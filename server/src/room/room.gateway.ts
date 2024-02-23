@@ -190,13 +190,13 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private joinPublicRoom(client: Socket, room: GameRoom) {
     room.clients.push(client);
     client.join(room.roomId);
-    client.emit('roomJoined', {
-      roomId: room.roomId,
-    });
 
     if (room.clients.length >= 2) {
       this.startGame(client, room.roomId);
     }
+    client.emit('roomJoined', {
+      roomId: room.roomId,
+    });
   }
 
   private notifyClientCount(room: GameRoom) {
@@ -225,9 +225,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       room &&
       room.clients.every((c) => this.playerScores[c.id] !== undefined)
     ) {
-      const winner = this.calculateWinner(room);
-
-      console.log(winner);
+      const winner = this.calculateWinner(room, playerName);
 
       room.clients.forEach((client) => {
         this.server.to(client.id).emit('gameResult', { winner });
@@ -237,24 +235,20 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   private calculateWinner(
     room: GameRoom,
-  ): { playerName: string; score: number } | null {
+    playerName: string,
+  ): { clientId: string; score: number; playerName: string } | null {
     let maxScore = -1;
-    let winner: { playerName: string; score: number } | null = null;
+    let winner: { clientId: string; score: number; playerName: string } | null =
+      null;
 
     room.clients.forEach((client) => {
       const score = this.playerScores[client.id] || 0;
       if (score > maxScore) {
         maxScore = score;
-        winner = { playerName: client.id, score };
+        winner = { clientId: client.id, score, playerName: playerName };
       }
     });
 
     return winner;
-  }
-
-  getRoomByClient(clientId: string): GameRoom | undefined {
-    return this.rooms.find((room) =>
-      room.clients.some((client) => client.id === clientId),
-    );
   }
 }

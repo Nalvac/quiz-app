@@ -28,7 +28,7 @@ export interface PlayerAnswer {
   isCorrect: boolean;
 }
 
-export interface  QuestionGen{
+export interface QuestionGen {
   question: string,
   possibleResponses: Array<string>,
   correctAnswer: string
@@ -38,4 +38,10 @@ export interface UserAnswer {
   question: string;
   response: string;
   isCorrect: boolean;
+}
+
+export interface Winner {
+  clientId: string,
+  score: number,
+  playerName: string
 }

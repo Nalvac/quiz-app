@@ -7,13 +7,13 @@ import {useUser} from "@/context/userContext";
 import { useRouter } from "next/navigation";
 import {useEffect, useState} from "react";
 import SuggestedAnswerDisplay from "@/app/_.components/SuggestedAnswer/page";
-import {QuestionGen} from  'gameinterface/models'
+import {QuestionGen, Winner} from 'gameinterface/models'
 export default function Game() {
   const router = useRouter();
   const { socket, isAdmin, userContextName, roomId,clientCount,setIsAdmin, setClientCount } = useUser();
   const [isStarted, setIsStarted] = useState(false)
   const [questions, setQuestions] = useState<QuestionGen[]>([])
-  const [winner, setWinner] = useState(null);
+  const [winner, setWinner] = useState<Winner | null>(null);
   const [winnerScore, setWinnerScore] = useState(null);
 
   socket.on('clientCount', (data: { clientsCount: number}) => {
@@ -26,9 +26,9 @@ export default function Game() {
   });
 
 
-  socket.on('gameResult', ({ winner }) => {
-    console.log(winner);
-    setWinner(winner);
+  socket.on('gameResult', (data: { winner: Winner }) => {
+    console.log(data);
+    setWinner(data.winner);
   });
 
   const handleGameEnd = (score: number, playerName: string) => {
@@ -50,26 +50,43 @@ export default function Game() {
     <div className={`d-flex flex-column ${styles.appContainer}`}>
       <Header />
       <div className='d-flex justify-content-center align-items-center flex-column flex-fill'>
-        {isAdmin ? (
+        {winner === null && (
           <>
-            {!isStarted && <button className={'btn-primary p-3 rounded mt-5'} onClick={() => handleStartGame(roomId)}>Lancer le jeu</button> }
-          </>
-        ) : (
-          <>
-            {/* eslint-disable-next-line react/no-unescaped-entities */}
-            {!isStarted && <p className={'text-white flex justify-center text-xl p-3'}>Attendez que l'administrateur lance la partie...</p>}
+            {isAdmin ? (
+              <>
+                {!isStarted && (
+                  <button className={'btn-primary p-3 rounded mt-5'} onClick={() => handleStartGame(roomId)}>
+                    Lancer le jeu
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                {!isStarted && (
+                  <p className={'text-white flex justify-center text-xl p-3'}>
+                    {/* eslint-disable-next-line react/no-unescaped-entities */}
+                    Attendez que l'administrateur lance la partie...
+                  </p>
+                )}
+              </>
+            )}
+
+            <p className={'p-2 text-x italic p-2 rounded bg-primary mt-2'}>
+              Vous êtes {clientCount ? clientCount : 'le premier joueur'} dans la salle
+            </p>
+
+            {isStarted && questions && (
+              <SuggestedAnswerDisplay questions={questions} onGameEnd={handleGameEnd} />
+            )}
           </>
         )}
 
-        <p className={'p-2 text-x italic p-2 rounded bg-primary mt-2'}>Vous êtes {clientCount ?  clientCount : 'le premier joueur' }  dans la salle</p>
-
-        {isStarted && questions &&  <SuggestedAnswerDisplay   questions={questions} onGameEnd={handleGameEnd}/> }
 
 
         <div>
           {winner !== null && (
             <div>
-              <p>Le gagnant est {winner} avec un score de {winnerScore} points !</p>
+              <p className={'p-2 text-2xl text-white font-bold'} >Le gagnant est {winner.playerName} avec un score de {winner.score} points !</p>
             </div>
           )}
         </div>
