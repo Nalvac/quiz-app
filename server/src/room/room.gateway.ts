@@ -37,7 +37,7 @@ export interface Winner {
 export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 
-  rooms: GameRoom[] = [];
+  private rooms: GameRoom[] = [];
   private playerScores: {
     [clientId: string]: { playerName: string; score: number };
   } = {};
@@ -108,14 +108,43 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       `Room created successfully ${newRoom.createBY.id}`,
     );
 
-    this.roomSrv.generateQuestions(roomConfig.themes, 4).then((questions) => {
-      newRoom.questions = questions;
-    });
+    this.roomSrv
+      .generateQuestions(roomConfig.themes, roomConfig.difficultyLevels, 4)
+      .then((questions) => {
+        newRoom.questions = questions;
+      });
   }
 
   @SubscribeMessage('startGame')
   handleStartGame(client: Socket, data: { roomId }) {
     this.startGame(client, data.roomId);
+  }
+
+  @SubscribeMessage('gameEnd')
+  handleGameEnd(
+    client: Socket,
+    {
+      playerName,
+      score,
+      roomId,
+    }: { playerName: string; score: number; roomId: string },
+  ) {
+    this.playerScores[client.id] = { playerName, score };
+
+    const room = this.getRoomById(roomId);
+
+    console.log(this.playerScores);
+
+    if (
+      room &&
+      room.clients.every((c) => this.playerScores[c.id] !== undefined)
+    ) {
+      const winner = this.calculateWinner(room);
+
+      room.clients.forEach((client) => {
+        this.server.to(client.id).emit('gameResult', { winner });
+      });
+    }
   }
 
   private startGame(client: Socket, roomId: string) {
@@ -202,10 +231,16 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       createBY: client,
     };
 
-    this.roomSrv.generateQuestions(['Science'], 4).then((questions) => {
-      newRoom.questions = questions;
-      this.rooms.push(newRoom);
-    });
+    this.roomSrv
+      .generateQuestions(
+        this.roomSrv.getRandomThemes(),
+        this.roomSrv.getRandomDifficulty(),
+        4,
+      )
+      .then((questions) => {
+        newRoom.questions = questions;
+        this.rooms.push(newRoom);
+      });
 
     client.join(roomId);
     client.emit('roomJoined', {
@@ -230,33 +265,6 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(room.roomId).emit('clientCount', {
       clientsCount,
     });
-  }
-
-  @SubscribeMessage('gameEnd')
-  handleGameEnd(
-    client: Socket,
-    {
-      playerName,
-      score,
-      roomId,
-    }: { playerName: string; score: number; roomId: string },
-  ) {
-    this.playerScores[client.id] = { playerName, score };
-
-    const room = this.getRoomById(roomId);
-
-    console.log(this.playerScores);
-
-    if (
-      room &&
-      room.clients.every((c) => this.playerScores[c.id] !== undefined)
-    ) {
-      const winner = this.calculateWinner(room);
-
-      room.clients.forEach((client) => {
-        this.server.to(client.id).emit('gameResult', { winner });
-      });
-    }
   }
 
   private calculateWinner(room: GameRoom): Winner | null {

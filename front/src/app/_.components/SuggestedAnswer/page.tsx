@@ -5,7 +5,11 @@ import React, { useState, useEffect } from "react";
 import { QuestionGen, UserAnswer } from "gameinterface/models";
 import {useUser} from "@/context/userContext";
 
-const SuggestedAnswerDisplay: React.FC<{ questions: QuestionGen[] , onGameEnd: (score: number, playerName: string) => void}> = ({ questions, onGameEnd}) => {
+const SuggestedAnswerDisplay: React.FC<{
+  questions: QuestionGen[],
+  onGameEnd: (score: number, playerName: string) => void,
+  setSpinner: (value: boolean) => void
+}> = ({ questions, onGameEnd, setSpinner}) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Array<UserAnswer>>([]);
   const [isCorrectAnswerSelected, setIsCorrectAnswerSelected] =  useState<boolean | null>(null);
@@ -25,6 +29,7 @@ const SuggestedAnswerDisplay: React.FC<{ questions: QuestionGen[] , onGameEnd: (
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     }else {
       const score = userAnswers.filter((answer) => answer.isCorrect).length;
+      setSpinner(true);
       onGameEnd(score, userContextName);
     }
   };

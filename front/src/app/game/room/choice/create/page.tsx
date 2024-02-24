@@ -46,6 +46,13 @@ export default function RoomChoice() {
 
 
   }, [themeChoice]);
+
+  useEffect(() => {
+    if (!userContextName) {
+      router?.push('/');
+      return;
+    }
+  }, []);
   const handleThemeChoice = (event: React.ChangeEvent<HTMLInputElement>) => {
     setThemeChoice(event.target.value);
   };

@@ -11,8 +11,13 @@ export class RoomsService {
     });
   }
 
+  themes = ['Science', 'Culture générale', 'Sport', 'Histoire', 'Technologie'];
+
+  difficulties = ['Facile', 'Moyen', 'Difficile'];
+
   async generateQuestions(
     themes: string[],
+    difficulty: string,
     numQuestions: number,
   ): Promise<
     {
@@ -28,7 +33,7 @@ export class RoomsService {
             messages: [
               {
                 role: 'user',
-                content: `Générer une question de quiz basée sur le thème : ${theme} (Question ${index + 1})
+                content: `Générer une question de quiz ${difficulty} basée sur le thème : ${theme} (Question ${index + 1})
                   qui a une question et quatre réponses possibles, et donnez-moi la réponse correcte ?
                   fournissez-moi ces informations directement sans aucune phrase supplémentaire`,
               },
@@ -71,4 +76,22 @@ export class RoomsService {
 
     return Promise.all(quizPromises).then((results) => results.flat());
   }
+
+  getRandomThemes = (): string[] => {
+    const availableTheme = [...this.themes];
+    const randomThemes = [];
+
+    for (let i = 0; i < 3 && availableTheme.length > 0; i++) {
+      const randomIndex = Math.floor(Math.random() * availableTheme.length);
+      const randomTheme = availableTheme.splice(randomIndex, 1)[0];
+      randomThemes.push(randomTheme);
+    }
+
+    return randomThemes;
+  };
+
+  getRandomDifficulty = () => {
+    const randomIndex = Math.floor(Math.random() * this.difficulties.length);
+    return this.difficulties[randomIndex];
+  };
 }

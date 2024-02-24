@@ -8,11 +8,13 @@ import { useRouter } from "next/navigation";
 import {useEffect, useState} from "react";
 import SuggestedAnswerDisplay from "@/app/_.components/SuggestedAnswer/page";
 import {QuestionGen, Winner} from 'gameinterface/models'
+import {LoadingQuiz} from "@/app/_.components/LoadingQuiz/LoadingQuiz";
 export default function Game() {
   const router = useRouter();
   const { socket, isAdmin, userContextName, roomId,clientCount, setClientCount } = useUser();
-  const [isStarted, setIsStarted] = useState(false)
-  const [questions, setQuestions] = useState<QuestionGen[]>([])
+  const [isStarted, setIsStarted] = useState(false);
+  const [questions, setQuestions] = useState<QuestionGen[]>([]);
+  const [showSpinner, setSpinner] = useState<boolean>(false);
   const [winner, setWinner] = useState<Winner | null>(null);
 
   socket.on('clientCount', (data: { clientsCount: number}) => {
@@ -26,7 +28,7 @@ export default function Game() {
 
 
   socket.on('gameResult', (data: { winner: Winner }) => {
-    console.log(data);
+    setSpinner(false);
     setWinner(data.winner);
   });
 
@@ -74,9 +76,12 @@ export default function Game() {
               Vous êtes {clientCount ? clientCount : 'le premier joueur'} dans la salle
             </p>
 
-            {isStarted && questions && (
-              <SuggestedAnswerDisplay questions={questions} onGameEnd={handleGameEnd} />
+            {isStarted && questions && !showSpinner && (
+              <SuggestedAnswerDisplay questions={questions} onGameEnd={handleGameEnd} setSpinner={setSpinner}/>
             )}
+            {showSpinner &&
+              <LoadingQuiz></LoadingQuiz>
+            }
           </>
         )}
 
