@@ -12,6 +12,11 @@ Pour configurer le projet, créez un fichier `.env` à la racine du dossier du s
 ```env
 OPENAI_API_KEY=your_openai_api_key
 ```
+```
+Dans notre projet de défi quiz, vous avez la possibilité de créer une salle de jeux privée dans laquelle vous pouvez participer en tant 
+qu'administrateur, ou une salle publique. En tant qu'administrateur de la salle, vous êtes le seul à pouvoir lancer le jeu. Dans la salle publique, le jeu démarre dès qu'il y a au moins deux joueurs.
+Veuillez noter qu'en raison d'éventuels problèmes de stabilité, il peut parfois être nécessaire de rafraîchir la page.
+```
 
 ## Comment exécuter le projet avec docker compose
 
