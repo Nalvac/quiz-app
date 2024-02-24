@@ -46,6 +46,13 @@ export default function RoomChoice() {
 
 
   }, [themeChoice]);
+
+  useEffect(() => {
+    if (!userContextName) {
+      router?.push('/');
+      return;
+    }
+  }, []);
   const handleThemeChoice = (event: React.ChangeEvent<HTMLInputElement>) => {
     setThemeChoice(event.target.value);
   };
@@ -87,6 +94,14 @@ export default function RoomChoice() {
     const randomThemes = getRandomThemes(themes);
     setTheme(randomThemes);
   };
+
+
+  useEffect(() => {
+    if (!userContextName) {
+      router?.push('/');
+      return;
+    }
+  }, []);
 
   return (
     <div className={`d-flex flex-column justify-content-center align-items-center ${styles.appContainer}`}>

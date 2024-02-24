@@ -5,7 +5,6 @@ import { io } from "socket.io-client";
 import { SuccessSnackBar } from '@/app/_.components/Snackbar/Success';
 import { ErrorSnackBar } from '@/app/_.components/Snackbar/Error';
 import { LoadingQuiz } from '@/app/_.components/LoadingQuiz/LoadingQuiz';
-import {useUser} from "@/context/userContext";
 
 interface IQuiz {
   question: string;
@@ -33,6 +32,7 @@ export default function Quiz() {
   const [totalQuestions] = useState(10);
   const [theme] = useState("Mathématique");
   let [timer] = useState<NodeJS.Timeout | null>(null);
+
 
   //const {socket} = useUser();
 

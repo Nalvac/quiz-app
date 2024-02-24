@@ -1,16 +1,10 @@
-# Dockerfile
-FROM node:18
+
+FROM node:21-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-
-COPY ../GameInterface/. ../GameInterface/
+COPY . .
 
 RUN npm install
 
-COPY . .
-
-EXPOSE 5100
-
-CMD [ "npm", "run", "dev" ]
+CMD ["npm", "run dev"]

@@ -1,10 +1,17 @@
 version: '3.1'
 networks:
   app_network:
-    name: fastnetwork
     driver: bridge
 
 services:
+  gameinterface:
+    build: gameinterface
+    volumes:
+      - ./GameInterface:/app/GameInterface
+    networks:
+      - app_network
+    command: npm start
+
   backend:
     build: server
     ports:
@@ -12,10 +19,11 @@ services:
     volumes:
       - ./server:/app
       - /app/node_modules
-    environment:
-      - NODE_ENV=development
     networks:
       - app_network
+    depends_on:
+      - gameinterface
+    command: npm run start:dev
 
   frontend:
     build: front
@@ -24,9 +32,10 @@ services:
     volumes:
       - ./front:/app
       - /app/node_modules
-    environment:
-      - NODE_ENV=development
     depends_on:
       - backend
+      - gameinterface
     networks:
       - app_network
+    command: npm run dev
+

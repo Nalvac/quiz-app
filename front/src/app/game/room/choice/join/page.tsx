@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import styles from "../../../../pages.module.scss";
 import { useUser } from "@/context/userContext";
 import Link from "next/link";
@@ -12,7 +12,7 @@ export default function JoinRoom() {
   const router = useRouter();
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    socket.emit('joinRoom', { roomId: roomName, isPrivate: true, password });
+    socket.emit('joinRoom', { roomId: roomName, isPrivate: true, password , userName: userContextName});
     socket.on('roomJoined', (data: { message: string, clientsCount: number, isAdmin: boolean, roomId: string }) => {
       setIsAdmin(data.isAdmin)
       setRoomId(data.roomId)
@@ -20,6 +20,13 @@ export default function JoinRoom() {
       router.push('/game/container');
     })
   };
+
+  useEffect(() => {
+    if (!userContextName) {
+      router?.push('/');
+      return;
+    }
+  }, []);
 
   return (
     <div className={`d-flex flex-column justify-content-center align-items-center ${styles.appContainer}`}>

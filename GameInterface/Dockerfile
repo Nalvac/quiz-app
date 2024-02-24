@@ -1,6 +1,10 @@
-# Dockerfile
+
 FROM node:18
 
-WORKDIR /app
+WORKDIR /app/GameInterface
 
-COPY package*.json ./
+COPY . .
+
+RUN npm install
+
+

@@ -19,6 +19,13 @@ qu'administrateur, ou une salle publique. En tant qu'administrateur de la salle,
 Veuillez noter qu'en raison d'éventuels problèmes de stabilité, il peut parfois être nécessaire de rafraîchir la page.
 ```
 
+## Comment exécuter le projet avec docker compose
+
+```
+docker-compose up --build
+```
+
+
 ## Comment exécuter le projet
 
 ### Frontend

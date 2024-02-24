@@ -6,14 +6,41 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
-import { GameRoom } from 'gameinterface/models';
-import {RoomsService} from "./room.service";
+import { RoomsService } from './room.service';
 
+export interface GameRoom {
+  roomId?: string;
+  name?: string;
+  password?: string;
+  isPrivate: boolean;
+  clients?: Socket[];
+  themes?: string[];
+  createBY?: Socket;
+  difficultyLevels: string;
+  randomTheme: boolean;
+  userName?: string;
+  questions?: Array<QuestionGen>;
+}
+
+export interface QuestionGen {
+  question: string;
+  possibleResponses: Array<string>;
+  correctAnswer: string;
+}
+
+export interface Winner {
+  clientId: string;
+  score: number;
+  playerName: string;
+}
 @WebSocketGateway()
 export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 
-  rooms: GameRoom[] = [];
+  private rooms: GameRoom[] = [];
+  private playerScores: {
+    [clientId: string]: { playerName: string; score: number };
+  } = {};
 
   constructor(private roomSrv: RoomsService) {}
   handleDisconnect(client: Socket) {
@@ -26,14 +53,14 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
       return room;
     });
+
+    this.rooms = this.rooms.filter((room) => room.createBY.id !== client.id);
   }
 
   handleConnection(client: Socket) {
     console.log(`Client connected 💪: ${client.id}`);
     client.emit('clientId', client.id);
   }
-
-  roomUsersCount: Record<string, number> = {};
 
   @SubscribeMessage('joinRoom')
   handleJoinRoom(
@@ -42,12 +69,12 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       roomId,
       isPrivate,
       password,
-    }: { roomId: string; isPrivate: boolean; password: string },
+    }: { roomId?: string; isPrivate?: boolean; password?: string },
   ) {
     if (isPrivate) {
       this.joinPrivateRoom(client, roomId, password);
     } else {
-      this.joinOrCreatePublicRoom(client, roomId);
+      this.joinOrCreatePublicRoom(client);
     }
   }
 
@@ -81,31 +108,56 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       `Room created successfully ${newRoom.createBY.id}`,
     );
 
-    console.log(roomConfig.themes);
-
-     this.roomSrv.generateQuestions(roomConfig.themes, 4).then((questions) => {
-       newRoom.questions = questions;
-
-       console.log(newRoom.questions);
-     });
-
-
+    this.roomSrv
+      .generateQuestions(roomConfig.themes, roomConfig.difficultyLevels, 4)
+      .then((questions) => {
+        newRoom.questions = questions;
+      });
   }
 
   @SubscribeMessage('startGame')
-  handleStartGame(client: Socket, roomId: string) {
-    this.startGame(client, roomId);
+  handleStartGame(client: Socket, data: { roomId }) {
+    this.startGame(client, data.roomId);
+  }
+
+  @SubscribeMessage('gameEnd')
+  handleGameEnd(
+    client: Socket,
+    {
+      playerName,
+      score,
+      roomId,
+    }: { playerName: string; score: number; roomId: string },
+  ) {
+    this.playerScores[client.id] = { playerName, score };
+
+    const room = this.getRoomById(roomId);
+
+    console.log(this.playerScores);
+
+    if (
+      room &&
+      room.clients.every((c) => this.playerScores[c.id] !== undefined)
+    ) {
+      const winner = this.calculateWinner(room);
+
+      room.clients.forEach((client) => {
+        this.server.to(client.id).emit('gameResult', { winner });
+      });
+    }
   }
 
   private startGame(client: Socket, roomId: string) {
     const room = this.getRoomById(roomId);
-
-    if (room && room.createBY.id === client.id) {
-
-      this.server.to(roomId).emit('questions', room.questions);
-      this.server.to(roomId).emit('gameStarted', {isStarted: true});
+    if (room) {
+      const questions = room.questions;
+      room.clients.forEach((c) => {
+        this.server
+          .to(c.id)
+          .emit('gameStarted', { isStarted: true, questions });
+      });
     } else {
-      client.emit('gameStarted', {isStarted: true});
+      client.emit('gameStarted', { isStarted: true });
     }
   }
 
@@ -124,7 +176,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.join(roomId);
 
       if (room.createBY.id != client.id) {
-        room.clients.push(client);
+        room.clients = [...room.clients, client];
       }
 
       const clientsCount = room.clients.length;
@@ -134,43 +186,104 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           message: `New user joined the private room ${roomId}`,
           clientsCount: clientsCount,
           isAdmin: true,
-          roomId: roomId,
+          roomId: room.roomId,
         });
       } else {
         client.emit('roomJoined', {
           message: `You've joined the private room ${roomId}`,
           clientsCount: clientsCount,
           isAdmin: false,
-          roomId: roomId,
+          roomId: room.roomId,
         });
       }
 
       this.server.to(room.createBY.id).emit('clientCount', {
         clientsCount: clientsCount,
-      })
+      });
     } else {
       client.emit('roomJoined', 'Invalid room or password');
     }
   }
 
+  private joinOrCreatePublicRoom(client: Socket) {
+    const publicRooms = this.rooms.filter(
+      (room) => !room.isPrivate && room.clients.length < 10,
+    );
 
-  private joinOrCreatePublicRoom(client: Socket, roomId: string) {
-    const publicRoom = this.rooms.find((room) => room.roomId === roomId);
-
-    if (!publicRoom) {
-      this.createPublicRoom();
-    } else if (publicRoom.clients.length < 10) {
-      this.joinPublicRoom(client, publicRoom);
+    if (publicRooms.length === 0) {
+      this.createPublicRoom(client);
     } else {
-      client.emit('roomFull', 'The public room is full');
+      const publicRoom = publicRooms[0];
+      this.joinPublicRoom(client, publicRoom);
+      this.notifyClientCount(publicRoom);
     }
   }
 
-  private createPublicRoom() {}
+  private createPublicRoom(client: Socket) {
+    const roomId = this.generateRandomRoomId();
+    const newRoom: GameRoom = {
+      difficultyLevels: 'Facile',
+      randomTheme: false,
+      roomId: roomId,
+      clients: [client],
+      themes: ['SCIENCE'],
+      isPrivate: false,
+      createBY: client,
+    };
+
+    this.roomSrv
+      .generateQuestions(
+        this.roomSrv.getRandomThemes(),
+        this.roomSrv.getRandomDifficulty(),
+        4,
+      )
+      .then((questions) => {
+        newRoom.questions = questions;
+        this.rooms.push(newRoom);
+      });
+
+    client.join(roomId);
+    client.emit('roomJoined', {
+      roomId: newRoom.roomId,
+    });
+  }
 
   private joinPublicRoom(client: Socket, room: GameRoom) {
     room.clients.push(client);
     client.join(room.roomId);
-    client.emit('roomJoined', `You've joined the public room ${room.roomId}`);
+
+    if (room.clients.length >= 2) {
+      this.startGame(client, room.roomId);
+    }
+    client.emit('roomJoined', {
+      roomId: room.roomId,
+    });
+  }
+
+  private notifyClientCount(room: GameRoom) {
+    const clientsCount = room.clients.length;
+    this.server.to(room.roomId).emit('clientCount', {
+      clientsCount,
+    });
+  }
+
+  private calculateWinner(room: GameRoom): Winner | null {
+    let maxScore = -1;
+    let winner: { clientId: string; score: number; playerName: string } | null =
+      null;
+
+    room.clients.forEach((client) => {
+      const scoreData = this.playerScores[client.id];
+      if (scoreData && scoreData.score > maxScore) {
+        maxScore = scoreData.score;
+        winner = {
+          clientId: client.id,
+          score: scoreData.score,
+          playerName: scoreData.playerName,
+        };
+      }
+    });
+
+    return winner;
   }
 }
